@@ -3257,7 +3257,6 @@ void CWriter::visitInlineAsm(CallInst &CI) {
 
     if (!IsFirst) {
       Out << ", ";
-      IsFirst = false;
     }
 
     // Unpack the dest.
@@ -3277,6 +3276,7 @@ void CWriter::visitInlineAsm(CallInst &CI) {
     if (DestValNo != -1)
       Out << ".field" << DestValNo; // Multiple retvals.
     Out << ")";
+    IsFirst = false;
     ++ValueCount;
   }
 
@@ -3298,7 +3298,6 @@ void CWriter::visitInlineAsm(CallInst &CI) {
 
     if (!IsFirst) {
       Out << ", ";
-      IsFirst = false;
     }
 
     assert(ValueCount >= ResultVals.size() && "Input can't refer to result");
@@ -3310,9 +3309,12 @@ void CWriter::visitInlineAsm(CallInst &CI) {
     else
       writeOperandDeref(SrcVal);
     Out << ")";
+    IsFirst = false;
+    ++ValueCount;
   }
 
   // Convert over the clobber constraints.
+  Out << "\n        :";
   IsFirst = true;
   for (InlineAsm::ConstraintInfoVector::iterator I = Constraints.begin(),
        E = Constraints.end(); I != E; ++I) {
@@ -3325,10 +3327,12 @@ void CWriter::visitInlineAsm(CallInst &CI) {
 
     if (!IsFirst) {
       Out << ", ";
-      IsFirst = false;
     }
 
-    Out << '\"' << C << '"';
+    assert(C[0] == '{' && "Expected clobber syntax is {REG}");
+    assert(C[C.length() - 1] == '}' && "Expected clobber syntax is {REG}");
+    Out << '\"' << C.substr(1, C.length() - 2) << '"';
+    IsFirst = false;
   }
 
   Out << ")";
