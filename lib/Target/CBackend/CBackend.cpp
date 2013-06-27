@@ -1689,6 +1689,7 @@ bool CWriter::doInitialization(Module &M) {
 
   // get declaration for alloca
   Out << "/* Provide Declarations */\n";
+  Out << "#include <stdint.h>\n";      // Exact-width int types
   Out << "#include <stdarg.h>\n";      // Varargs support
   Out << "#include <setjmp.h>\n";      // Unwind support
   Out << "#include <limits.h>\n";      // With overflow intrinsics support.
