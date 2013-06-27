@@ -1790,7 +1790,7 @@ bool CWriter::doInitialization(Module &M) {
     }
 
     if (I->getName() == "setjmp" ||
-        I->getName() == "longjmp" || I->getName() == "_setjmp")
+        I->getName() == "longjmp" || I->getName() == "_setjmp" || I->getName() == "main")
       continue;
 
     if (I->hasExternalWeakLinkage())
@@ -2218,7 +2218,11 @@ void CWriter::printFunctionSignature(const Function *F, bool Prototype) {
   }
 
   // Print out the return type and the signature built above.
-  printType(Out, RetTy,
+  if (GetValueName(F) == "main")
+    // Main is forever int (clang gives error on anything else)
+    Out << "int " << FunctionInnards.str();
+  else
+    printType(Out, RetTy,
             /*isSigned=*/PAL.paramHasAttr(0, Attribute::SExt),
             FunctionInnards.str());
 }
