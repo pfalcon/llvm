@@ -579,8 +579,13 @@ TailDuplicatePass::shouldTailDuplicate(const MachineFunction &MF,
     if (PreRegAlloc && I->getDesc().isCall())
       return false;
 
-    if (!I->isPHI() && !I->isDebugValue())
+    if (I->isInlineAsm()) {
+      // For inlime asm "instruction" get actual number of contained instructions
+      const TargetInstrInfo &TII = *MF.getTarget().getInstrInfo();
+      InstrCount += TII.getInlineAsmInstCount(I->getOperand(0).getSymbolName(), *MF.getTarget().getMCAsmInfo());
+    } else if (!I->isPHI() && !I->isDebugValue()) {
       InstrCount += 1;
+    }
 
     if (InstrCount > MaxDuplicateCount)
       return false;
