@@ -584,6 +584,11 @@ public:
   virtual unsigned getInlineAsmLength(const char *Str,
                                       const MCAsmInfo &MAI) const;
 
+  /// Measure the specified inline asm to determine an approximation of its
+  /// instruction count.
+  virtual unsigned getInlineAsmInstCount(const char *Str,
+                                         const MCAsmInfo &MAI) const;
+
   /// CreateTargetHazardRecognizer - Allocate and return a hazard recognizer to
   /// use for this target when scheduling the machine instructions before
   /// register allocation.

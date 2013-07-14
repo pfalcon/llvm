@@ -172,3 +172,33 @@ unsigned TargetInstrInfo::getInlineAsmLength(const char *Str,
 
   return Length;
 }
+
+/// Count (heuristically) number of instructions the specified inline asm.
+/// This is needed in addition to getInlineAsmLength() because some
+/// constrainsts in LLVM are expressed in terms of instruction count.
+/// Comments (which run till the next SeparatorString or newline) do not
+/// count as an instruction.
+/// Any other non-whitespace text is considered an instruction, with
+/// multiple instructions separated by SeparatorString or newlines.
+unsigned TargetInstrInfo::getInlineAsmInstCount(const char *Str,
+                                             const MCAsmInfo &MAI) const {
+
+
+  // Count the number of instructions in the asm.
+  bool atInsnStart = true;
+  unsigned Length = 0;
+  for (; *Str; ++Str) {
+    if (*Str == '\n' || strncmp(Str, MAI.getSeparatorString(),
+                                strlen(MAI.getSeparatorString())) == 0)
+      atInsnStart = true;
+    if (atInsnStart && !std::isspace(*Str)) {
+      ++Length;
+      atInsnStart = false;
+    }
+    if (atInsnStart && strncmp(Str, MAI.getCommentString(),
+                               strlen(MAI.getCommentString())) == 0)
+      atInsnStart = false;
+  }
+
+  return Length;
+}
